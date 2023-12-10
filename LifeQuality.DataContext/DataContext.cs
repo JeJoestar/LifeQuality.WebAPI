@@ -10,6 +10,7 @@ namespace LifeQuality.DataContext
         public DbSet<Patient> Patients { get; set; }
         public DbSet<Patron> Patrons { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Sensor> Sensor { get; set; }
         public DataContext(DbContextOptions<DataContext> options): base(options)
         {
 

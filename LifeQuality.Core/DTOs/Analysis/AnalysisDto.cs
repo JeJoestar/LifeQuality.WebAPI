@@ -1,4 +1,6 @@
-﻿namespace LifeQuality.WebAPI.DTOs
+﻿using LifeQuality.DataContext.Model;
+
+namespace LifeQuality.WebAPI.DTOs.Analysis
 {
     public class AnalysisDto
     {
@@ -6,6 +8,6 @@
         public string PatientName { get; set; }
         public string? Type { get; set; }
         public DateTime ReceivedAt { get; set; }
-        public string Address { get; set; }
+        public AnalysisStatus Status { get; set; }
     }
 }

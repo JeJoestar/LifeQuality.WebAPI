@@ -182,7 +182,6 @@ namespace LifeQuality.DataContext.Repository
                 }
 
                 _dbSet.Add(entity);
-                _context.SaveChanges();
             });
         }
 
@@ -263,6 +262,11 @@ namespace LifeQuality.DataContext.Repository
             {
                 throw;
             }
+        }
+
+        public Task SaveAsync()
+        {
+            return _context.SaveChangesAsync();
         }
     }
 }

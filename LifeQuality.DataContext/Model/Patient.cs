@@ -9,6 +9,7 @@ namespace LifeQuality.DataContext.Model
     public class Patient : User
     {
         public string? AdditioanlInfo { get; set; }
+        public string? Address { get; set; }
         public int DoctorId { get; set; }
         public int PatronId { get; set; }
 
