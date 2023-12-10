@@ -182,6 +182,7 @@ namespace LifeQuality.DataContext.Repository
                 }
 
                 _dbSet.Add(entity);
+                _context.SaveChanges();
             });
         }
 

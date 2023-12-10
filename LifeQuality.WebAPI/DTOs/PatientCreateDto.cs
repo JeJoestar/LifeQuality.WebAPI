@@ -1,0 +1,11 @@
+﻿namespace LifeQuality.WebAPI.DTOs
+{
+    public class PatientCreateDto
+    {
+        public string? profileImageUrl {get; set;}
+        public string Name { get; set;}
+        public string Email { get; set;}
+        public string Phone { get; set;}
+        public string Address { get; set;}
+    }
+}
