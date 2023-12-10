@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 
 namespace LifeQuality.DataContext.Repository
@@ -42,5 +43,6 @@ namespace LifeQuality.DataContext.Repository
         void Update(TEntity entity, bool withTimeUpdate = true);
 
         Task Remove(int entityId);
+        Task SaveAsync();
     }
 }
