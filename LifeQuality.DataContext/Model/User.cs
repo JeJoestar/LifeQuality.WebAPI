@@ -8,6 +8,7 @@
         public string Email { get; set; }
         public string ProfileImageUrl { get; set; }
         public int Age { get; set; }
+        public UserType UserType { get; set; } 
 
     }
 }

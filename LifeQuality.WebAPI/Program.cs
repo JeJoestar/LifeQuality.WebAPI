@@ -66,6 +66,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+await app.Services.CreateScope().ServiceProvider.GetRequiredService<IDataContext>().Database.MigrateAsync();
 
 app.UseHttpsRedirection();
 

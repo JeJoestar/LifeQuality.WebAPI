@@ -17,6 +17,7 @@ namespace LifeQuality.Core.Services
             List<Claim> claims = new()
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Role, user.UserType.ToString()),
             };
 
             return GetToken(claims);
