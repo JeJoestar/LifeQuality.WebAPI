@@ -4,9 +4,9 @@ namespace LifeQuality.WebAPI.DTOs.Analysis
 {
     public class SmallAnalysisDto
     {
-        string AnalysisType { get; set; }
-        string ReceivedAt { get; set; }
-        bool IsRegular { get; set; }
-        AnalysisStatus Status { get; set; }
+        public string AnalysisType { get; set; }
+        public string ReceivedAt { get; set; }
+        public bool IsRegular { get; set; }
+        public AnalysisStatus Status { get; set; }
     }
 }

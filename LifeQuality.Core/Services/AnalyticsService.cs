@@ -3,18 +3,18 @@ using LifeQuality.DataContext.Repository;
 
 namespace LifeQuality.Core.Services
 {
-    public class AnalysisService
+    public class AnalyticsService
     {
         private readonly IDataRepository<Sensor> _sensorRepository;
-        public AnalysisService(IDataRepository<Sensor> sensorRepository)
+        public AnalyticsService(IDataRepository<Sensor> sensorRepository)
         {
             _sensorRepository = sensorRepository;
         }
-        public async Task<BloodAnalysisData> AnalyseReceivedData(int id)
+        public async Task<BloodAnalysisData> AnalyseReceivedDataAsync(int id)
         {
-            var sensorToRead = await _sensorRepository.GetByAsync(s => s.Id == id);
-            RemoveAnomalies();
-            if (sensorToRead.Type == "General") 
+            var sensorToRead = await _sensorRepository.GetFirstOrDefaultAsync(x => x.Id == id);
+            RemoveAnomalies(sensorToRead);
+            if (sensorToRead.Type == "General")
             {
                 return new GeneralBloodAnalysisData()
                 {
@@ -25,7 +25,7 @@ namespace LifeQuality.Core.Services
                     MCV = Guid.NewGuid().ToString(),
                 };
             }
-            else if(sensorToRead.Type == "Sugar")
+            else if (sensorToRead.Type == "Sugar")
             {
                 return new SugarBloodAnalysisData()
                 {
@@ -34,7 +34,7 @@ namespace LifeQuality.Core.Services
                     HbA1c = Random.Shared.NextDouble()
                 };
             }
-            else if(sensorToRead.Type == "Cholesterol")
+            else if (sensorToRead.Type == "Cholesterol")
             {
                 return new CholesterolBloodAnalysisData()
                 {
@@ -45,9 +45,9 @@ namespace LifeQuality.Core.Services
             }
             return null;
         }
-        private void RemoveAnomalies()
+        public void RemoveAnomalies(Sensor sensorToCheck)
         {
-
+            
         }
     }
 }

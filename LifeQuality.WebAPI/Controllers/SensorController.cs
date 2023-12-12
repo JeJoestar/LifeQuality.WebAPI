@@ -3,12 +3,14 @@ using LifeQuality.Core.DTOs.Sensors;
 using LifeQuality.DataContext.Model;
 using LifeQuality.DataContext.Repository;
 using LifeQuality.WebAPI.DTOs.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LifeQuality.WebAPI.Controllers
 {
     [ApiController]
     [Route("sensor")]
+    [Authorize]
     public class SensorController : ControllerBase
     {
         private IDataRepository<Sensor> _sensorRepository;

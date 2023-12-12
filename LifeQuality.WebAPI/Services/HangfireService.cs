@@ -1,42 +1,27 @@
 ﻿using Hangfire;
+using LifeQuality.Core.Services;
 
 namespace LifeQuality.WebAPI.Services
 {
     public class HangfireService
     {
         private readonly IBackgroundJobClient _backgroundJobClient;
+        private readonly AnalyticsService _analyticsService;
 
-        public HangfireService(IBackgroundJobClient backgroundJobClient)
+        public HangfireService(IBackgroundJobClient backgroundJobClient, AnalyticsService analyticsService)
         {
             _backgroundJobClient = backgroundJobClient;
-        }
-        public void CreateDelayedJob(string jobType)
-        {
-            _backgroundJobClient.Enqueue(() => YourDelayedJobMethod(jobType));
+            _analyticsService = analyticsService;
         }
 
-        public void CreateScheduledJob(string jobType, DateTimeOffset scheduledTime)
+        public string CreateScheduledJob(int sensorId, DateTimeOffset scheduledTime)
         {
-            _backgroundJobClient.Schedule(() => YourScheduledJobMethod(jobType), scheduledTime);
+            return _backgroundJobClient.Schedule(() => GetScheduledData(sensorId), scheduledTime);
         }
 
-        public void CreateManualJob(string jobType)
+        public async void GetScheduledData(int sensorId)
         {
-            _backgroundJobClient.Enqueue(() => YourManualJobMethod(jobType));
-        }
-        public void YourDelayedJobMethod(string jobType)
-        {
-
-        }
-
-        public void YourScheduledJobMethod(string jobType)
-        {
-
-        }
-
-        public void YourManualJobMethod(string jobType)
-        {
-
+            await _analyticsService.AnalyseReceivedDataAsync(sensorId);
         }
     }
 }

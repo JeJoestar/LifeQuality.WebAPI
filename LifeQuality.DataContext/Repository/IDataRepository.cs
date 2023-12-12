@@ -4,6 +4,7 @@
 
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Query;
 
 namespace LifeQuality.DataContext.Repository
@@ -44,5 +45,6 @@ namespace LifeQuality.DataContext.Repository
 
         Task Remove(int entityId);
         Task SaveAsync();
+        public EntityEntry Entry(TEntity entity);
     }
 }
