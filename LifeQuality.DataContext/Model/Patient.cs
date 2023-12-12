@@ -10,7 +10,10 @@ namespace LifeQuality.DataContext.Model
     {
         public string? AdditioanlInfo { get; set; }
         public string? Address { get; set; }
+
+        public Doctor Doctor { get; set; }
         public int DoctorId { get; set; }
+        public Patron Patron { get; set; }
         public int PatronId { get; set; }
 
         public double Height { get; set; }

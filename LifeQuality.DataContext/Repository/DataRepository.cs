@@ -1,5 +1,6 @@
 ﻿using LifeQuality.DataContext.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
@@ -267,6 +268,10 @@ namespace LifeQuality.DataContext.Repository
         public Task SaveAsync()
         {
             return _context.SaveChangesAsync();
+        }
+        public EntityEntry Entry(TEntity entity)
+        {
+            return _context.Entry(entity);
         }
     }
 }

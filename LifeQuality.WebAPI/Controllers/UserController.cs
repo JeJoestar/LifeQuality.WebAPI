@@ -1,53 +1,70 @@
 ﻿using AutoMapper;
+using LifeQuality.Core.DTOs.Users;
+using LifeQuality.Core.Services;
 using LifeQuality.DataContext.Model;
 using LifeQuality.DataContext.Repository;
 using LifeQuality.WebAPI.DTOs.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LifeQuality.WebAPI.Controllers
 {
     [ApiController]
     [Route("users")]
+    [Authorize]
     public class UserController : ControllerBase
     {
-        private IDataRepository<User> _userRepository;
+        private readonly IDataRepository<User> _userRepository;
+        private readonly IDataRepository<Patient> _patientRepository;
+        private readonly IDataRepository<Doctor> _doctorRepository;
         private readonly IMapper _mapper;
-        public UserController(IMapper mapper, IDataRepository<User> userRepository) 
+        public UserController(IMapper mapper, IDataRepository<User> userRepository,
+            IDataRepository<Patient> patientRepository,
+            IDataRepository<Doctor> doctorRepository) 
         {
             _mapper = mapper;
             _userRepository = userRepository;
+            _patientRepository = patientRepository;
+            _doctorRepository = doctorRepository;
         }
+
         [HttpGet("GetPatients")]
         public async Task<IActionResult> GetPatients()
         {
-            var patientsToReturn = _mapper.Map<IEnumerable<PatientDto>>(await _userRepository.GetAllAsync());
+            var doctorId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(doctorId))
+            {
+                return NotFound();
+            }
+
+            var patientsToReturn = _mapper.Map<IEnumerable<PatientInfoDto>>(await _userRepository.GetByManyAsync(p => p.Id == Convert.ToInt32(doctorId)));
             return Ok(patientsToReturn);
         }
-        [HttpGet("GetPatient/{id}")]
-        public async Task<IActionResult> GetPatient([FromRoute] int id)
+        [HttpGet("GetProfile/{id}")]
+        public async Task<IActionResult> GetDoctorProfile([FromRoute] int id)
         {
-            var patientToReturn = _mapper.Map<PatientDto>(await _userRepository.GetByAsync(p => p.Id == id));
-            return Ok(patientToReturn);
+            var doctorToReturn = await _doctorRepository.GetFirstOrDefaultAsync(p => p.Id == id);
+
+            if (doctorToReturn == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<DoctorProfileDto>(doctorToReturn));
         }
         [HttpGet("GetProfile/{id}")]
-        public async Task<IActionResult> GetProfile([FromRoute] int id)
+        public async Task<IActionResult> GetPatientProfile([FromRoute] int id)
         {
-            //TODO: new mapper to User
-            var userToReturn = _mapper.Map<PatientDto>(await _userRepository.GetByAsync(p => p.Id == id));
-            return Ok(userToReturn);
-        }
-        [HttpPost("CreatePatient")]
-        public async Task<IActionResult> CreatePatient([FromBody] PatientCreateDto patientCreateDto)
-        {
-            if (!ModelState.IsValid)
+            var patientToReturn = await _patientRepository.GetFirstOrDefaultAsync(p => p.Id == id);
+
+            if (patientToReturn == null)
             {
-                return BadRequest(ModelState);
+                return NotFound();
             }
-            var patientEntity = _mapper.Map<User>(patientCreateDto);
-            _userRepository.AddNew(patientEntity);
-            await _userRepository.SaveAsync();
-            
-            return Ok();
+
+            return Ok(_mapper.Map<PatientProfileDto>(patientToReturn));
         }
     }
 }
