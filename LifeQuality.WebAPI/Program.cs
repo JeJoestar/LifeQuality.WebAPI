@@ -5,6 +5,7 @@ using LifeQuality.Core.Services;
 using LifeQuality.DataContext;
 using LifeQuality.DataContext.Model;
 using LifeQuality.DataContext.Repository;
+using LifeQuality.WebAPI.Hubs;
 using LifeQuality.WebAPI.Mappers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,7 @@ builder.Services.AddHangfire(configuration => configuration
         .UsePostgreSqlStorage(connectionString));
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -64,10 +66,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<MainHub>("/hubs/main");
 
 app.Run();
