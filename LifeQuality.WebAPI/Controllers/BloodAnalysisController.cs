@@ -1,10 +1,15 @@
-﻿using LifeQuality.Core.Requests;
+﻿using AutoMapper;
+using LifeQuality.Core.DTOs.Users;
+using LifeQuality.Core.Requests;
 using LifeQuality.Core.Services;
 using LifeQuality.DataContext.Model;
 using LifeQuality.DataContext.Repository;
+using LifeQuality.WebAPI.DTOs.Analysis;
 using LifeQuality.WebAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace LifeQuality.WebAPI.Controllers
 {
@@ -16,20 +21,34 @@ namespace LifeQuality.WebAPI.Controllers
         private readonly BloodAndAnalysisService _bloodAndAnalysisService;
         private readonly SensorClient _sensorClient;
         private readonly HangfireService _hangfireService;
+        private readonly IMapper _mapper;
 
         public BloodAnalysisController(HangfireService hangfireService,
             BloodAndAnalysisService bloodAndAnalysisService,
-            SensorClient sensorClient)
+            SensorClient sensorClient,
+            IMapper mapper)
         {
             _hangfireService = hangfireService;
             _bloodAndAnalysisService = bloodAndAnalysisService;
             _sensorClient = sensorClient;
+            _mapper = mapper;
         }
-        [HttpGet("RequestAnalysis")]
-        public async Task<IActionResult> RequestAnalysis()
+        [HttpGet("RequestAllAnalysis")]
+        public IActionResult RequestAllAnalysis()
         {
-            var _analysisToReturn = _bloodAndAnalysisService.
-                GetAllAsync(orderBy: q => q.OrderByDescending(entity => entity.AnalysisDate));
+            var _analysisToReturn = _mapper.Map<IEnumerable<SmallAnalysisDto>>(_bloodAndAnalysisService
+                .Include(q => q.Sensor).Select(q => q));
+
+            return Ok();
+        }
+        [HttpGet("RequestAnalysis/{id}")]
+        public IActionResult RequestAnalysis([FromRoute] int id)
+        {
+            var _analysisToReturn = _mapper.Map<AnalysisDto>(_bloodAndAnalysisService
+                .Include(q => q.Sensor)
+                .Include(q => q.Patient)
+                .FirstOrDefault(q => q.Id == id));
+
             return Ok();
         }
         [HttpPost("CreateScheduleOfRequest")]

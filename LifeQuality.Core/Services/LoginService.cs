@@ -1,5 +1,6 @@
 ﻿using LifeQuality.Core.Response;
 using LifeQuality.DataContext.Model;
+using LifeQuality.DataContext.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,14 +13,14 @@ namespace LifeQuality.Core.Services
     public class LoginService : ILoginService
     {
         private readonly ITokenService _tokenService;
-        private readonly IUserProvider _userProvider;
+        private IDataRepository<User> _userRepository;
 
         public LoginService(
             ITokenService tokenService,
-            IUserProvider userProvider)
+            IDataRepository<User> userRepository)
         {
             _tokenService = tokenService;
-            _userProvider = userProvider;
+            _userRepository = userRepository;
         }
 
         public async Task<AuthenticateResponse> AuthenticateAsync(
@@ -27,7 +28,7 @@ namespace LifeQuality.Core.Services
             string password,
             bool useHash = true)
         {
-            User user = await _userProvider.GetByNameAsync(name);
+            User user = await _userRepository.GetByAsync(u=>u.Name ==  name);
 
             string hash = password;
 
@@ -47,7 +48,7 @@ namespace LifeQuality.Core.Services
         {
             string jwtToken = _tokenService.GenerateJwtToken(user);
 
-            await _userProvider.UpdateAsync(user);
+            _userRepository.Update(user);
 
             return new(user, jwtToken);
         }

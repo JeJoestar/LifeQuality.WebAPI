@@ -1,5 +1,6 @@
 ﻿using LifeQuality.DataContext.Model;
 using LifeQuality.DataContext.Repository;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
@@ -35,5 +36,10 @@ namespace LifeQuality.Core.Services
         {
             return await _analysisRepository.GetAllAsync(predicate, orderBy, include, disableTracking, ignoreQueryFilters);
         }
+        public IIncludableQueryable<BloodAnalysisData, TNavigateEntity> Include<TNavigateEntity>(Expression<Func<BloodAnalysisData, TNavigateEntity>> navigationPropertyPath)
+        {
+            return _analysisRepository.Include(navigationPropertyPath);
+        }
+
     }
 }
