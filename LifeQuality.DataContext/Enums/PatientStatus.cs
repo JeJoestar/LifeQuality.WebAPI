@@ -8,7 +8,7 @@ namespace LifeQuality.DataContext.Enums
 {
     public enum PatientStatus
     {
-        Sick,
-        NotSick
+        Stable,
+        Unstable,
     }
 }

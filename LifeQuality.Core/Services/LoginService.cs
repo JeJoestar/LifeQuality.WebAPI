@@ -24,11 +24,11 @@ namespace LifeQuality.Core.Services
         }
 
         public async Task<AuthenticateResponse> AuthenticateAsync(
-            string name,
+            string email,
             string password,
             bool useHash = true)
         {
-            User user = await _userRepository.GetByAsync(u=>u.Name == name);
+            User user = await _userRepository.GetByAsync(u=>u.Email == email);
 
             string hash = password;
 

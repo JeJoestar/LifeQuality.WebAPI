@@ -33,23 +33,29 @@ namespace LifeQuality.WebAPI.Controllers
             _sensorClient = sensorClient;
             _mapper = mapper;
         }
-        [HttpGet("RequestAllAnalysis")]
-        public IActionResult RequestAllAnalysis()
+        [HttpGet("by-doctor/{doctorId}")]
+        [ProducesResponseType(typeof(List<SmallAnalysisDto>), StatusCodes.Status200OK)]
+        public IActionResult RequestAllAnalysis([FromRoute] int doctorId)
         {
-            var _analysisToReturn = _mapper.Map<IEnumerable<SmallAnalysisDto>>(_bloodAndAnalysisService
-                .Include(q => q.Sensor).Select(q => q));
+            var _analysisToReturn = _mapper.Map<List<SmallAnalysisDto>>(
+                _bloodAndAnalysisService
+                    .Include(q => q.Sensor)
+                    .Include(q => q.Patient)
+                    .Where(a => a.Patient.DoctorId == doctorId)
+                    .Select(q => q));
 
-            return Ok();
+            return Ok(_analysisToReturn);
         }
-        [HttpGet("RequestAnalysis/{id}")]
-        public IActionResult RequestAnalysis([FromRoute] int id)
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(AnalysisDto), StatusCodes.Status200OK)]
+        public IActionResult GetAnalysisById([FromRoute] int id)
         {
             var _analysisToReturn = _mapper.Map<AnalysisDto>(_bloodAndAnalysisService
                 .Include(q => q.Sensor)
                 .Include(q => q.Patient)
                 .FirstOrDefault(q => q.Id == id));
 
-            return Ok();
+            return Ok(_analysisToReturn);
         }
         [HttpPost("CreateScheduleOfRequest")]
         public async Task<IActionResult> CreateScheduleOfRequest([FromBody] ScheduledAnalysisRequest analysisRequest)
@@ -60,6 +66,7 @@ namespace LifeQuality.WebAPI.Controllers
 
             return Ok();
         }
+
         [HttpPost("CreateDelayedRequest")]
         public async Task<IActionResult> CreateDelayedRequest([FromBody] DelayedAnalysisRequest analysisRequest)
         {
@@ -69,6 +76,7 @@ namespace LifeQuality.WebAPI.Controllers
 
             return Ok();
         }
+
         [HttpPost("CreateRequest")]
         public async Task<IActionResult> CreateRequest([FromBody] AnalysisRequest analysisRequest)
         {

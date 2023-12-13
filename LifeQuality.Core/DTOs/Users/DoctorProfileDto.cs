@@ -2,5 +2,6 @@
 {
     public class DoctorProfileDto : UserDto
     {
+        public string DoctorSpeciality { get; set; }
     }
 }

@@ -8,9 +8,10 @@ namespace LifeQuality.Core
 {
     public static class Constants
     {
-        public readonly static byte[] salt = Encoding.UTF8.GetBytes("PIDORAS");
-        public readonly static int jwtLifetimeMin = 3;
-        public readonly static string jwtIssuer = "";
-        public readonly static string jwtAudience = "";
+        public readonly static byte[] salt = Encoding.UTF8.GetBytes("VeryGoodSaltForTokens");
+        public readonly static int jwtLifetimeMin = 30;
+        public readonly static string jwtIssuer = "QualityLife";
+        public readonly static string jwtAudience = "QualityLifeClient";
+        public static string BearerAuth { get; } = "bearerAuth";
     }
 }
