@@ -8,8 +8,8 @@ namespace LifeQuality.Core.Requests
 {
     public class AnalysisRequest
     {
-        public int PatientId { get; set; }
+        public string PatientName { get; set; }
         public string AnalysisType { get; set;}
-        public string Comment { get; set;}
+        public string? Comment { get; set;}
     }
 }

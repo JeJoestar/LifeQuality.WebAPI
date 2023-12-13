@@ -8,7 +8,8 @@ namespace LifeQuality.Core.Requests
 {
     public class RecomendationRequest
     {
-        public int UserId { get; set; }
+        public string ReceiverName { get; set; }
+        public int AnalysisId { get; set; }
         public string Message { get; set; }
     }
 }

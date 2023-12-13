@@ -30,9 +30,8 @@ namespace LifeQuality.DataContext.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AnalysisDate")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTime>("AnalysisDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Data")
                         .IsRequired()
@@ -42,6 +41,9 @@ namespace LifeQuality.DataContext.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsRegular")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("PatientId")
                         .HasColumnType("integer");
 
@@ -50,10 +52,6 @@ namespace LifeQuality.DataContext.Migrations
 
                     b.Property<int>("SensorId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LifeQuality.Core.DTOs;
 using LifeQuality.Core.DTOs.Users;
 using LifeQuality.Core.Requests;
 using LifeQuality.Core.Services;
@@ -54,6 +55,25 @@ namespace LifeQuality.WebAPI.Controllers
                 (string.IsNullOrEmpty(filterByName) || p.Name.ToLower().Contains(filterByName.ToLower())) 
                 && p.DoctorId == Convert.ToInt32(doctorId)));
             
+            return Ok(patientsToReturn);
+        }
+
+        [HttpGet("patients-autocomplete")]
+        [ProducesResponseType(typeof(List<FastEntityDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAutocompletePatients([FromQuery] string? filterByName = null)
+        {
+            var doctorId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(doctorId))
+            {
+                return NotFound();
+            }
+
+            var patientsToReturn = _mapper.Map<List<FastEntityDto>>(
+                await _patientRepository.GetByManyAsync(p =>
+                (string.IsNullOrEmpty(filterByName) || p.Name.ToLower().Contains(filterByName.ToLower()))
+                && p.DoctorId == Convert.ToInt32(doctorId)));
+
             return Ok(patientsToReturn);
         }
 
@@ -125,35 +145,40 @@ namespace LifeQuality.WebAPI.Controllers
         }
 
         [HttpPost("recomendation")]
-        public async Task<IActionResult> CreateRecomendation([FromBody]RecomendationRequest recomendationRequest)
+        public async Task<IActionResult> CreateRecomendation([FromBody]RecomendationRequest recommendationRequest)
         {
-            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
+            int userId = int.Parse(User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            var doctorToReturn = await _doctorRepository.GetFirstOrDefaultAsync(p => p.Id == userId);
+            var receiver = await _patientRepository.GetFirstOrDefaultAsync(p => p.Name == recommendationRequest.ReceiverName);
 
             var rec = new Recomendation()
             {
-                RecieverId = recomendationRequest.UserId,
-                Content = recomendationRequest.Message
+                RecieverId = receiver.Id,
+                AnalysisId = recommendationRequest.AnalysisId,
+                Content = recommendationRequest.Message
             };
 
             _recomendationRepository.AddNew(rec);
             await _recomendationRepository.SaveAsync();
 
-            await _hubContext.Clients.User(userId).ReceiveNotification(new()
+            await _hubContext.Clients.User(receiver.Id.ToString()).ReceiveNotification(new ()
             {
-                Message = recomendationRequest.Message
+                DoctorName = doctorToReturn.Name,
+                Message = recommendationRequest.Message,
+                ReceivedAt = DateTime.UtcNow,
             });
 
             return Ok();
         }
 
         [HttpPost("patient")]
+        [AllowAnonymous]
         public async Task<IActionResult> CreatePatient()
         {
             var patient = new Patient()
             {
                 Name = "Ivan",
-                Password = "Password",
+                Password = "Password1",
                 PhoneNumber = "1234567890",
                 Email = "Email@gmail.com",
                 Age = 30,
@@ -173,16 +198,16 @@ namespace LifeQuality.WebAPI.Controllers
 
 
         [HttpPost("doctor")]
+        [AllowAnonymous]
         public async Task<IActionResult> CreateDoctor()
         {
             var doctor = new Doctor()
             {
-                Id = 1,
                 Age = 30,
                 CreatedAt = DateTime.UtcNow,
                 Email = "doctor@gmail.com",
                 Name = "Олег Фрайт",
-                Password = "qwerty1",
+                Password = "String123@",
                 PhoneNumber = "0667192834",
                 Speciality = "Лікар-дерматолог",
                 UpdatedAt = DateTime.UtcNow,

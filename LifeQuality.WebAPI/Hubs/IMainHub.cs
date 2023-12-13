@@ -4,6 +4,6 @@ namespace LifeQuality.WebAPI.Hubs
 {
     public interface IMainHub
     {
-        Task ReceiveNotification(NotificationDto notification);
+        Task ReceiveNotification(RecommendationDto notification);
     }
 }

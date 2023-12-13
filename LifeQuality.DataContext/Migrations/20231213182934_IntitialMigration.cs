@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LifeQuality.DataContext.Migrations
 {
     /// <inheritdoc />
-    public partial class PreFinalMigration1 : Migration
+    public partial class IntitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -71,8 +71,7 @@ namespace LifeQuality.DataContext.Migrations
                         name: "FK_Users_Users_PatronId",
                         column: x => x.PatronId,
                         principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -81,9 +80,9 @@ namespace LifeQuality.DataContext.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    AnalysisDate = table.Column<string>(type: "text", nullable: false),
+                    AnalysisDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     PatientId = table.Column<int>(type: "integer", nullable: false),
-                    Source = table.Column<string>(type: "text", nullable: false),
+                    IsRegular = table.Column<bool>(type: "boolean", nullable: false),
                     Data = table.Column<string>(type: "text", nullable: false),
                     ReceivedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     SensorId = table.Column<int>(type: "integer", nullable: false),

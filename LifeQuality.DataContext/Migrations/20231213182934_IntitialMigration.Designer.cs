@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LifeQuality.DataContext.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231213025119_PreFinalMigration2")]
-    partial class PreFinalMigration2
+    [Migration("20231213182934_IntitialMigration")]
+    partial class IntitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,9 +33,8 @@ namespace LifeQuality.DataContext.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AnalysisDate")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTime>("AnalysisDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Data")
                         .IsRequired()
@@ -45,6 +44,9 @@ namespace LifeQuality.DataContext.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsRegular")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("PatientId")
                         .HasColumnType("integer");
 
@@ -53,10 +55,6 @@ namespace LifeQuality.DataContext.Migrations
 
                     b.Property<int>("SensorId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");

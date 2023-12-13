@@ -11,6 +11,5 @@ namespace LifeQuality.DataContext.Model
         Done,
         Pending,
         Failed,
-        Regular
     }
 }

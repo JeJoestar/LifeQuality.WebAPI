@@ -8,6 +8,18 @@ namespace LifeQuality.Core.Requests
 {
     public class ScheduledAnalysisRequest: AnalysisRequest
     {
-        public TimeSpan TimeSpan { get; set; }
+        public IntervalType Interval { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+
+    }
+
+    public enum IntervalType
+    {
+        Minutes,
+        Hourly,
+        Daily,
+        Weekly,
+        Monthly,
     }
 }

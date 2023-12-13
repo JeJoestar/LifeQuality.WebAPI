@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LifeQuality.Core.DTOs;
 using LifeQuality.Core.DTOs.Analysis;
 using LifeQuality.Core.DTOs.Recommendations;
 using LifeQuality.Core.DTOs.Sensors;
@@ -35,10 +36,11 @@ namespace LifeQuality.WebAPI.Mappers
                 .ReverseMap();
 
             CreateMap<Sensor, SensorStatusDTO>().ReverseMap();
+            CreateMap<Patient, FastEntityDto>().ReverseMap();
 
             CreateMap<BloodAnalysisData, SmallAnalysisDto>()
                 .ForMember(dest => dest.ReceivedAt, opt => opt.MapFrom(src => src.ReceivedAt))
-                .ForMember(dest => dest.IsRegular, opt => opt.MapFrom(src => src.Sensor.ReadingType == ReadingType.Scheduled))
+                .ForMember(dest => dest.IsRegular, opt => opt.MapFrom(src => src.IsRegular))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
                 .ForMember(dest => dest.AnalysisType, opt => opt.MapFrom(src => src.Sensor.Type))
                 .ForMember(dest => dest.PatientName, opt => opt.MapFrom(src => src.Patient.Name))

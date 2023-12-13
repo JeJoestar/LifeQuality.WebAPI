@@ -21,9 +21,9 @@ namespace LifeQuality.Core.Services
             _analysisRepository = analysisRepository;
             _sensorClient = sensorClient;
         }
-        public async void CreateAnalysisDataAsync(int sensorId)
+        public async Task CreateAnalysisDataAsync(int sensorId, int patientId, bool isRegular)
         {
-            var readenData = await _analyticsService.AnalyseReceivedDataAsync(sensorId);
+            var readenData = await _analyticsService.AnalyseReceivedDataAsync(sensorId, patientId, isRegular);
             _analysisRepository.AddNew(readenData);
             await _analysisRepository.SaveAsync();
         }

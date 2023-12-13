@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LifeQuality.Core.DTOs.Analysis;
 using LifeQuality.Core.DTOs.Users;
 using LifeQuality.Core.Requests;
 using LifeQuality.Core.Services;
@@ -20,15 +21,19 @@ namespace LifeQuality.WebAPI.Controllers
     {
         private readonly BloodAndAnalysisService _bloodAndAnalysisService;
         private readonly SensorClient _sensorClient;
+        private readonly IDataRepository<Patient> _patientRepository;
         private readonly HangfireService _hangfireService;
         private readonly IMapper _mapper;
 
-        public BloodAnalysisController(HangfireService hangfireService,
+        public BloodAnalysisController(
+            HangfireService hangfireService,
+            IDataRepository<Patient> patientRepository,
             BloodAndAnalysisService bloodAndAnalysisService,
             SensorClient sensorClient,
             IMapper mapper)
         {
             _hangfireService = hangfireService;
+            _patientRepository = patientRepository;
             _bloodAndAnalysisService = bloodAndAnalysisService;
             _sensorClient = sensorClient;
             _mapper = mapper;
@@ -37,20 +42,21 @@ namespace LifeQuality.WebAPI.Controllers
         [ProducesResponseType(typeof(List<SmallAnalysisDto>), StatusCodes.Status200OK)]
         public IActionResult RequestAllAnalysis([FromRoute] int doctorId)
         {
-            var _analysisToReturn = _mapper.Map<List<SmallAnalysisDto>>(
-                _bloodAndAnalysisService
+            var analysis = _bloodAndAnalysisService
                     .Include(q => q.Sensor)
                     .Include(q => q.Patient)
                     .Where(a => a.Patient.DoctorId == doctorId)
-                    .Select(q => q));
+                    .Select(q => q)
+                    .ToList();
+            var _analysisToReturn = _mapper.Map<List<SmallAnalysisDto>>(analysis);
 
             return Ok(_analysisToReturn);
         }
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(AnalysisDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AnalysisInfoDto), StatusCodes.Status200OK)]
         public IActionResult GetAnalysisById([FromRoute] int id)
         {
-            var _analysisToReturn = _mapper.Map<AnalysisDto>(_bloodAndAnalysisService
+            var _analysisToReturn = _mapper.Map<AnalysisInfoDto>(_bloodAndAnalysisService
                 .Include(q => q.Sensor)
                 .Include(q => q.Patient)
                 .FirstOrDefault(q => q.Id == id));
@@ -60,19 +66,24 @@ namespace LifeQuality.WebAPI.Controllers
         [HttpPost("CreateScheduleOfRequest")]
         public async Task<IActionResult> CreateScheduleOfRequest([FromBody] ScheduledAnalysisRequest analysisRequest)
         {
-            var sensor = await _sensorClient.RequestSensor(analysisRequest.PatientId, analysisRequest.AnalysisType);
+            var patient = await _patientRepository.GetByAsync(p => p.Name == analysisRequest.PatientName);
+            var sensor = await _sensorClient.RequestSensor(patient.Id, analysisRequest.AnalysisType);
+            TimeSpan timeSpan = analysisRequest.Interval switch
+            {
+                IntervalType.Minutes => TimeSpan.FromMinutes(1),
+                IntervalType.Hourly => TimeSpan.FromHours(1),
+                IntervalType.Daily => TimeSpan.FromDays(1),
+                IntervalType.Weekly => TimeSpan.FromDays(7),
+                IntervalType.Monthly => TimeSpan.FromDays(30),
+            };
+            sensor.ReadingType = DataContext.Enums.ReadingType.Scheduled;
 
-            _hangfireService.CreateScheduledJob(sensor.Id, analysisRequest.TimeSpan);
-
-            return Ok();
-        }
-
-        [HttpPost("CreateDelayedRequest")]
-        public async Task<IActionResult> CreateDelayedRequest([FromBody] DelayedAnalysisRequest analysisRequest)
-        {
-            var sensor = await _sensorClient.RequestSensor(analysisRequest.PatientId, analysisRequest.AnalysisType);
-
-            _hangfireService.CreateDelayedJob(sensor.Id, analysisRequest.DateTimeOffset);
+            _hangfireService.CreateRecurrentJobUntil(
+                sensor.Id,
+                patient.Id,
+                timeSpan, 
+                analysisRequest.StartDate, 
+                analysisRequest.EndDate);
 
             return Ok();
         }
@@ -80,9 +91,10 @@ namespace LifeQuality.WebAPI.Controllers
         [HttpPost("CreateRequest")]
         public async Task<IActionResult> CreateRequest([FromBody] AnalysisRequest analysisRequest)
         {
-            var sensor = await _sensorClient.RequestSensor(analysisRequest.PatientId, analysisRequest.AnalysisType);
+            var patient = await _patientRepository.GetByAsync(p => p.Name == analysisRequest.PatientName);
+            var sensor = await _sensorClient.RequestSensor(patient.Id, analysisRequest.AnalysisType);
 
-            _bloodAndAnalysisService.CreateAnalysisDataAsync(sensor.Id);
+            await _bloodAndAnalysisService.CreateAnalysisDataAsync(sensor.Id, patient.Id, false);
 
             return Ok();
         }

@@ -6,25 +6,33 @@ namespace LifeQuality.WebAPI.Services
     public class HangfireService
     {
         private readonly IBackgroundJobClient _backgroundJobClient;
-        private readonly AnalyticsService _analyticsService;
+        private readonly BloodAndAnalysisService _bloodAndAnalysisService;
 
-        public HangfireService(IBackgroundJobClient backgroundJobClient, AnalyticsService analyticsService)
+        public HangfireService(IBackgroundJobClient backgroundJobClient, BloodAndAnalysisService bloodAndAnalysisService)
         {
             _backgroundJobClient = backgroundJobClient;
-            _analyticsService = analyticsService;
+            _bloodAndAnalysisService = bloodAndAnalysisService;
         }
 
-        public string CreateScheduledJob(int sensorId, TimeSpan scheduledTime)
+        public string CreateRecurrentJobUntil(int sensorId, int patientId, TimeSpan scheduledTime, DateTime? start = null, DateTime? until = null)
         {
-            return _backgroundJobClient.Schedule(() => GetScheduledData(sensorId), scheduledTime);
+            var newScheduledTime = (start ?? DateTime.UtcNow).Add(scheduledTime);
+            return _backgroundJobClient.Schedule(() => GetScheduledData(sensorId, patientId, scheduledTime, until), newScheduledTime);
         }
-        public string CreateDelayedJob(int sensorId, DateTimeOffset scheduledTime)
+
+        public async Task GetScheduledData(int sensorId, int patientId, TimeSpan scheduledTime, DateTime? until = null)
         {
-            return _backgroundJobClient.Schedule(() => GetScheduledData(sensorId), scheduledTime);
-        }
-        public async void GetScheduledData(int sensorId)
-        {
-            await _analyticsService.AnalyseReceivedDataAsync(sensorId);
+            await _bloodAndAnalysisService.CreateAnalysisDataAsync(sensorId, patientId, true);
+
+            if (!until.HasValue)
+            {
+                _backgroundJobClient.Schedule(() => GetScheduledData(sensorId, patientId, scheduledTime, null), scheduledTime);
+            } 
+            else if (DateTime.UtcNow.Add(scheduledTime) < until)
+            {
+                _backgroundJobClient.Schedule(() => GetScheduledData(sensorId, patientId, scheduledTime, until), scheduledTime);
+            }
+
         }
     }
 }

@@ -9,10 +9,10 @@ namespace LifeQuality.DataContext.Model
 {
     public abstract class BloodAnalysisData : EntityBase
     {
-        public string AnalysisDate { get; set; }
+        public DateTime AnalysisDate { get; set; }
         public int PatientId { get; set; }
         public Patient Patient { get; set; }
-        public string Source { get; set; }
+        public bool IsRegular { get; set; }
         public string Data { get; set; }
         public DateTime ReceivedAt { get; set; }
         public int SensorId { get; set; }

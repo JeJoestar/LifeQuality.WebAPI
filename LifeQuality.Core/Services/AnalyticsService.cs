@@ -10,14 +10,15 @@ namespace LifeQuality.Core.Services
         {
             _sensorRepository = sensorRepository;
         }
-        public async Task<BloodAnalysisData> AnalyseReceivedDataAsync(int sensorId)
+        public async Task<BloodAnalysisData> AnalyseReceivedDataAsync(int sensorId, int patientId, bool isRegular)
         {
             var sensorToRead = await _sensorRepository.GetFirstOrDefaultAsync(x => x.Id == sensorId);
             RemoveAnomalies(sensorToRead);
             AnalysisStatus status;
+
             if(sensorToRead.ReadingType == DataContext.Enums.ReadingType.Scheduled)
             {
-                status = AnalysisStatus.Regular;
+                status = AnalysisStatus.Done;
             }
             else if(sensorToRead.ReadingType == DataContext.Enums.ReadingType.Delayed)
             {
@@ -31,9 +32,12 @@ namespace LifeQuality.Core.Services
             {
                 status = AnalysisStatus.Failed;
             }
-            if (sensorToRead.Type == "General")
+
+            BloodAnalysisData data = null;
+
+            if (sensorToRead.Type == "ЗАК")
             {
-                return new GeneralBloodAnalysisData()
+                data = new GeneralBloodAnalysisData()
                 {
                     Status = status,
                     WBC = Guid.NewGuid().ToString(),
@@ -43,9 +47,9 @@ namespace LifeQuality.Core.Services
                     MCV = Guid.NewGuid().ToString(),
                 };
             }
-            else if (sensorToRead.Type == "Sugar")
+            else if (sensorToRead.Type == "Цукор")
             {
-                return new SugarBloodAnalysisData()
+                data = new SugarBloodAnalysisData()
                 {
                     Status = status,
                     BloodSugarLevel = Random.Shared.NextDouble(),
@@ -53,9 +57,9 @@ namespace LifeQuality.Core.Services
                     HbA1c = Random.Shared.NextDouble()
                 };
             }
-            else if (sensorToRead.Type == "Cholesterol")
+            else if (sensorToRead.Type == "Холестерин")
             {
-                return new CholesterolBloodAnalysisData()
+                data = new CholesterolBloodAnalysisData()
                 {
                     Status = status,
                     CholesterolLevel = Random.Shared.NextDouble(),
@@ -63,7 +67,18 @@ namespace LifeQuality.Core.Services
                     NormalLevelRequirement = Random.Shared.NextDouble()
                 };
             }
-            return null;
+
+            if (data is not null)
+            {
+                data.AnalysisDate = DateTime.UtcNow;
+                data.ReceivedAt = DateTime.UtcNow;
+                data.IsRegular = isRegular;
+                data.SensorId = sensorId;
+                data.PatientId = patientId;
+                data.CreateData();
+            }
+
+            return data;
         }
         public void RemoveAnomalies(Sensor sensorToCheck)
         {
