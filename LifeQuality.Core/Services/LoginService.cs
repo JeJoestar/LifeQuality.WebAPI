@@ -28,7 +28,7 @@ namespace LifeQuality.Core.Services
             string password,
             bool useHash = true)
         {
-            User user = await _userRepository.GetByAsync(u=>u.Name ==  name);
+            User user = await _userRepository.GetByAsync(u=>u.Name == name);
 
             string hash = password;
 

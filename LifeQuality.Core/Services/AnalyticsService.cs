@@ -10,7 +10,11 @@ namespace LifeQuality.Core.Services
         {
             _sensorRepository = sensorRepository;
         }
-        public async Task<BloodAnalysisData> AnalyseReceivedDataAsync(int sensorId)
+        public AnalyticsService()
+        {
+
+        }
+        public virtual async Task<BloodAnalysisData> AnalyseReceivedDataAsync(int sensorId)
         {
             var sensorToRead = await _sensorRepository.GetFirstOrDefaultAsync(x => x.Id == sensorId);
             RemoveAnomalies(sensorToRead);

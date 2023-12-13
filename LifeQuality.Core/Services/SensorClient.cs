@@ -17,6 +17,10 @@ namespace LifeQuality.Core.Services
         {
             _sensorRepository = sensorRepository;
         }
+        public SensorClient()
+        {
+
+        }
 
         public async Task<Sensor> RequestSensor(int patientId, string type)
         {
