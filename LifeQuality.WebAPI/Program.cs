@@ -124,6 +124,12 @@ var app = builder.Build();
 
 await app.Services.CreateScope().ServiceProvider.GetRequiredService<IDataContext>().Database.MigrateAsync();
 
+app.UseCors(options => options
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .SetIsOriginAllowed(origin => true)
+    .AllowCredentials());
+
 if (app.Environment.IsDevelopment())
 {
     app.UseHangfireDashboard();
@@ -134,8 +140,6 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "LifeQuality v1");
     });
 }
-
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

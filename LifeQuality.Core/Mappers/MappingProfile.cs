@@ -30,7 +30,9 @@ namespace LifeQuality.WebAPI.Mappers
                 .ForMember(dest => dest.DoctorName, opt => opt.MapFrom(src => src.Doctor.Name))
                 .ReverseMap();
 
-            CreateMap<Doctor, DoctorProfileDto>().ReverseMap();
+            CreateMap<Doctor, DoctorProfileDto>()
+                .ForMember(dest => dest.DoctorSpeciality, opt => opt.MapFrom(src => src.Speciality))
+                .ReverseMap();
 
             CreateMap<Sensor, SensorStatusDTO>().ReverseMap();
 
@@ -39,6 +41,7 @@ namespace LifeQuality.WebAPI.Mappers
                 .ForMember(dest => dest.IsRegular, opt => opt.MapFrom(src => src.Sensor.ReadingType == ReadingType.Scheduled))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
                 .ForMember(dest => dest.AnalysisType, opt => opt.MapFrom(src => src.Sensor.Type))
+                .ForMember(dest => dest.PatientName, opt => opt.MapFrom(src => src.Patient.Name))
                 .ReverseMap();
             CreateMap<Recomendation, ShortRecommendationDto>()
                 .ForMember(dest => dest.ReceivedAt, opt => opt.MapFrom(src => src.CreatedAt))

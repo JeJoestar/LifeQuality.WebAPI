@@ -40,7 +40,7 @@ namespace LifeQuality.WebAPI.Controllers
 
         [HttpGet("patients")]
         [ProducesResponseType(typeof(List<PatientDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetPatients()
+        public async Task<IActionResult> GetPatients([FromQuery] string? filterByName = null)
         {
             var doctorId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
@@ -49,12 +49,15 @@ namespace LifeQuality.WebAPI.Controllers
                 return NotFound();
             }
 
-            var patientsToReturn = _mapper.Map<List<PatientDto>>(await _patientRepository.GetByManyAsync(p => p.DoctorId == Convert.ToInt32(doctorId)));
+            var patientsToReturn = _mapper.Map<List<PatientDto>>(
+                await _patientRepository.GetByManyAsync(p => 
+                (string.IsNullOrEmpty(filterByName) || p.Name.ToLower().Contains(filterByName.ToLower())) 
+                && p.DoctorId == Convert.ToInt32(doctorId)));
             
             return Ok(patientsToReturn);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("patient/{id}")]
         [ProducesResponseType(typeof(PatientInfoDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPatientInfo([FromRoute] int id)
         {
@@ -90,6 +93,7 @@ namespace LifeQuality.WebAPI.Controllers
         //}
 
         [HttpGet("doctor-profile/{id}")]
+        [ProducesResponseType(typeof(DoctorProfileDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetDoctorProfile([FromRoute] int id)
         {
             var doctorToReturn = await _doctorRepository.GetFirstOrDefaultAsync(p => p.Id == id);
