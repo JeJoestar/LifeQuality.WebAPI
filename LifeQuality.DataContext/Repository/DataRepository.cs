@@ -273,5 +273,10 @@ namespace LifeQuality.DataContext.Repository
         {
             return _context.Entry(entity);
         }
+
+        public IIncludableQueryable<TEntity, TNavigateEntity> Include<TNavigateEntity>(Expression<Func<TEntity, TNavigateEntity>> navigationPropertyPath)
+        {
+            return _dbSet.Include(navigationPropertyPath);
+        }
     }
 }

@@ -8,17 +8,21 @@ namespace LifeQuality.Core.Services
     public class BloodAndAnalysisService
     {
         private readonly AnalyticsService _analyticsService;
+        private readonly SensorClient _sensorClient;
 
         private IDataRepository<BloodAnalysisData> _analysisRepository;
 
-        public BloodAndAnalysisService(AnalyticsService analyticsService, IDataRepository<BloodAnalysisData> analysisRepository, IDataRepository<Sensor> sensorRepository)
+        public BloodAndAnalysisService(AnalyticsService analyticsService,
+
+            IDataRepository<BloodAnalysisData> analysisRepository, SensorClient sensorClient)
         {
             _analyticsService = analyticsService;
             _analysisRepository = analysisRepository;
+            _sensorClient = sensorClient;
         }
-        public async void CreateAnalysisDataAsync(int id)
+        public async void CreateAnalysisDataAsync(int sensorId)
         {
-            var readenData = await _analyticsService.AnalyseReceivedDataAsync(id);
+            var readenData = await _analyticsService.AnalyseReceivedDataAsync(sensorId);
             _analysisRepository.AddNew(readenData);
             await _analysisRepository.SaveAsync();
         }

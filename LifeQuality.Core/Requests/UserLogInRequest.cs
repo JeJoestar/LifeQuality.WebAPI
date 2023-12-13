@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LifeQuality.Core.DTOs.Users
 {
-    public class UserLogInDto
+    public class UserLogInRequest
     {
         public string Email { get; set; }
         public string Password { get; set; }

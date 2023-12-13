@@ -46,5 +46,6 @@ namespace LifeQuality.DataContext.Repository
         Task Remove(int entityId);
         Task SaveAsync();
         public EntityEntry Entry(TEntity entity);
+        public IIncludableQueryable<TEntity, TNavigateEntity> Include<TNavigateEntity>(Expression<Func<TEntity, TNavigateEntity>> navigationPropertyPath);
     }
 }

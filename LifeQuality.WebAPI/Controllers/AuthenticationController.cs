@@ -18,7 +18,7 @@ namespace LifeQuality.WebAPI.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] UserLogInDto userLogInDto)
+        public async Task<IActionResult> Login([FromBody] UserLogInRequest userLogInDto)
         {
             var authenticateResponse = await _loginService.AuthenticateAsync(userLogInDto.Email, userLogInDto.Password, false);
 

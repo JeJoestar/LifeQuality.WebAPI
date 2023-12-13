@@ -8,8 +8,8 @@ namespace LifeQuality.DataContext.Enums
 {
     public enum ReadingType
     {
-        Delayed,
         Scheduled,
-        Manual
+        Manual,
+        Delayed
     }
 }

@@ -3,9 +3,9 @@ using LifeQuality.Core.DTOs.Users;
 using LifeQuality.Core.Services;
 using LifeQuality.DataContext.Model;
 using LifeQuality.DataContext.Repository;
-using LifeQuality.WebAPI.DTOs.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace LifeQuality.WebAPI.Controllers
@@ -15,16 +15,14 @@ namespace LifeQuality.WebAPI.Controllers
     [Authorize]
     public class UserController : ControllerBase
     {
-        private readonly IDataRepository<User> _userRepository;
         private readonly IDataRepository<Patient> _patientRepository;
         private readonly IDataRepository<Doctor> _doctorRepository;
         private readonly IMapper _mapper;
-        public UserController(IMapper mapper, IDataRepository<User> userRepository,
+        public UserController(IMapper mapper,
             IDataRepository<Patient> patientRepository,
             IDataRepository<Doctor> doctorRepository) 
         {
             _mapper = mapper;
-            _userRepository = userRepository;
             _patientRepository = patientRepository;
             _doctorRepository = doctorRepository;
         }
@@ -39,7 +37,8 @@ namespace LifeQuality.WebAPI.Controllers
                 return NotFound();
             }
 
-            var patientsToReturn = _mapper.Map<IEnumerable<PatientInfoDto>>(await _userRepository.GetByManyAsync(p => p.Id == Convert.ToInt32(doctorId)));
+            var patientsToReturn = _mapper.Map<IEnumerable<PatientDto>>(await _patientRepository.GetByManyAsync(p => p.DoctorId == Convert.ToInt32(doctorId)));
+            
             return Ok(patientsToReturn);
         }
         [HttpGet("GetProfile/{id}")]
@@ -57,7 +56,9 @@ namespace LifeQuality.WebAPI.Controllers
         [HttpGet("GetProfile/{id}")]
         public async Task<IActionResult> GetPatientProfile([FromRoute] int id)
         {
-            var patientToReturn = await _patientRepository.GetFirstOrDefaultAsync(p => p.Id == id);
+            var patientToReturn = await _patientRepository.Include(p => p.BloodAnalysisDatas)
+                .Include(p => p.Reports)
+                .Include(p => p.Doctor).FirstOrDefaultAsync(p => p.Id == id);
 
             if (patientToReturn == null)
             {
@@ -65,6 +66,11 @@ namespace LifeQuality.WebAPI.Controllers
             }
 
             return Ok(_mapper.Map<PatientProfileDto>(patientToReturn));
+        }
+        [HttpPost("CreateRecomendations")]
+        public async Task<IActionResult> CreateRecomendations()
+        {
+            return Ok();
         }
     }
 }

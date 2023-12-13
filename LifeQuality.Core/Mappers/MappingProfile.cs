@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using LifeQuality.Core.DTOs.Recommendations;
 using LifeQuality.Core.DTOs.Sensors;
 using LifeQuality.Core.DTOs.Users;
+using LifeQuality.DataContext.Enums;
 using LifeQuality.DataContext.Model;
-using LifeQuality.WebAPI.DTOs.Users;
+using LifeQuality.WebAPI.DTOs.Analysis;
 
 namespace LifeQuality.WebAPI.Mappers
 {
@@ -13,16 +15,35 @@ namespace LifeQuality.WebAPI.Mappers
         {
             CreateMap<Patient, PatientInfoDto>()
                 .ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.ProfileImageUrl))
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
-                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
-                .ForMember(dest => dest.PatientStatusDescription, opt => opt.MapFrom(src => src.Address))
-                .ForMember(dest => dest.DoctorName, opt => opt.MapFrom(src => src.Doctor.Name));
+                .ForMember(dest => dest.PatientStatusDescription, opt => opt.MapFrom(src => src.Description))
+                .ForMember(dest => dest.Analysis, opt => opt.MapFrom(src => src.BloodAnalysisDatas))
+                .ForMember(dest => dest.DoctorName, opt => opt.MapFrom(src => src.Doctor.Name)).ReverseMap();
 
-            CreateMap<Sensor, SensorStatusDTO>()
-                .ForMember(dest => dest.PatientId, opt => opt.MapFrom(src => src.PatientId))
-                .ForMember(dest => dest.IsAvailable, opt => opt.MapFrom(src => src.IsAvailable))
-                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type));
+            CreateMap<Patient, PatientDto>().ReverseMap();
+
+            CreateMap<Patient, PatientProfileDto>()
+                .ForMember(dest => dest.Recommendations, opt => opt.MapFrom(src => src.Reports.Select(r => r.ReportContext)))
+                .ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.ProfileImageUrl))
+                .ForMember(dest => dest.PatientStatusDescription, opt => opt.MapFrom(src => src.Description))
+                .ForMember(dest => dest.Analysis, opt => opt.MapFrom(src => src.BloodAnalysisDatas))
+                .ForMember(dest => dest.DoctorName, opt => opt.MapFrom(src => src.Doctor.Name))
+                .ReverseMap();
+
+            CreateMap<Doctor, DoctorProfileDto>().ReverseMap();
+
+            CreateMap<Sensor, SensorStatusDTO>().ReverseMap();
+
+            CreateMap<BloodAnalysisData, SmallAnalysisDto>()
+                .ForMember(dest => dest.ReceivedAt, opt => opt.MapFrom(src => src.ReceivedAt))
+                .ForMember(dest => dest.IsRegular, opt => opt.MapFrom(src => src.Sensor.ReadingType == ReadingType.Scheduled))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+                .ForMember(dest => dest.AnalysisType, opt => opt.MapFrom(src => src.Sensor.Type))
+                .ReverseMap();
+            CreateMap<Report, ShortRecommendationDto>()
+                .ForMember(dest => dest.ReceivedAt, opt => opt.MapFrom(src => src.Analisis.ReceivedAt))
+                .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.ReportContext))
+                .ForMember(dest => dest.Analysis, opt => opt.MapFrom(src => src.Analisis))
+                .ReverseMap();
         }
     }
 }

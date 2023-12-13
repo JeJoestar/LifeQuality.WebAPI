@@ -14,11 +14,14 @@ namespace LifeQuality.WebAPI.Services
             _analyticsService = analyticsService;
         }
 
-        public string CreateScheduledJob(int sensorId, DateTimeOffset scheduledTime)
+        public string CreateScheduledJob(int sensorId, TimeSpan scheduledTime)
         {
             return _backgroundJobClient.Schedule(() => GetScheduledData(sensorId), scheduledTime);
         }
-
+        public string CreateDelayedJob(int sensorId, DateTimeOffset scheduledTime)
+        {
+            return _backgroundJobClient.Schedule(() => GetScheduledData(sensorId), scheduledTime);
+        }
         public async void GetScheduledData(int sensorId)
         {
             await _analyticsService.AnalyseReceivedDataAsync(sensorId);

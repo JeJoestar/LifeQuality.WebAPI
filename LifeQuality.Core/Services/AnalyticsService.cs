@@ -10,14 +10,32 @@ namespace LifeQuality.Core.Services
         {
             _sensorRepository = sensorRepository;
         }
-        public async Task<BloodAnalysisData> AnalyseReceivedDataAsync(int id)
+        public async Task<BloodAnalysisData> AnalyseReceivedDataAsync(int sensorId)
         {
-            var sensorToRead = await _sensorRepository.GetFirstOrDefaultAsync(x => x.Id == id);
+            var sensorToRead = await _sensorRepository.GetFirstOrDefaultAsync(x => x.Id == sensorId);
             RemoveAnomalies(sensorToRead);
+            AnalysisStatus status;
+            if(sensorToRead.ReadingType == DataContext.Enums.ReadingType.Scheduled)
+            {
+                status = AnalysisStatus.Regular;
+            }
+            else if(sensorToRead.ReadingType == DataContext.Enums.ReadingType.Delayed)
+            {
+                status = AnalysisStatus.Pending;
+            }
+            else if (sensorToRead.ReadingType == DataContext.Enums.ReadingType.Manual)
+            {
+                status = AnalysisStatus.Done;
+            }
+            else
+            {
+                status = AnalysisStatus.Failed;
+            }
             if (sensorToRead.Type == "General")
             {
                 return new GeneralBloodAnalysisData()
                 {
+                    Status = status,
                     WBC = Guid.NewGuid().ToString(),
                     HGB = Guid.NewGuid().ToString(),
                     RBC = Guid.NewGuid().ToString(),
@@ -29,6 +47,7 @@ namespace LifeQuality.Core.Services
             {
                 return new SugarBloodAnalysisData()
                 {
+                    Status = status,
                     BloodSugarLevel = Random.Shared.NextDouble(),
                     BloodGlucose = Random.Shared.NextDouble(),
                     HbA1c = Random.Shared.NextDouble()
@@ -38,6 +57,7 @@ namespace LifeQuality.Core.Services
             {
                 return new CholesterolBloodAnalysisData()
                 {
+                    Status = status,
                     CholesterolLevel = Random.Shared.NextDouble(),
                     Triglyceride = Random.Shared.NextDouble(),
                     NormalLevelRequirement = Random.Shared.NextDouble()
