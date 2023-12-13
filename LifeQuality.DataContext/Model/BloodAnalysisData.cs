@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace LifeQuality.DataContext.Model
 {
-    public abstract class BloodAnalysisData: EntityBase
+    public abstract class BloodAnalysisData : EntityBase
     {
         public string AnalysisDate { get; set; }
         public int PatientId { get; set; }
