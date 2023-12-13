@@ -33,7 +33,7 @@ namespace LifeQuality.WebAPI.Controllers
             _sensorClient = sensorClient;
             _mapper = mapper;
         }
-        [HttpGet("RequestAllAnalysis")]
+        [HttpGet]
         public IActionResult RequestAllAnalysis()
         {
             var _analysisToReturn = _mapper.Map<IEnumerable<SmallAnalysisDto>>(_bloodAndAnalysisService
@@ -41,7 +41,7 @@ namespace LifeQuality.WebAPI.Controllers
 
             return Ok();
         }
-        [HttpGet("RequestAnalysis/{id}")]
+        [HttpGet("{id}")]
         public IActionResult RequestAnalysis([FromRoute] int id)
         {
             var _analysisToReturn = _mapper.Map<AnalysisDto>(_bloodAndAnalysisService
@@ -60,6 +60,7 @@ namespace LifeQuality.WebAPI.Controllers
 
             return Ok();
         }
+
         [HttpPost("CreateDelayedRequest")]
         public async Task<IActionResult> CreateDelayedRequest([FromBody] DelayedAnalysisRequest analysisRequest)
         {
@@ -69,6 +70,7 @@ namespace LifeQuality.WebAPI.Controllers
 
             return Ok();
         }
+
         [HttpPost("CreateRequest")]
         public async Task<IActionResult> CreateRequest([FromBody] AnalysisRequest analysisRequest)
         {
