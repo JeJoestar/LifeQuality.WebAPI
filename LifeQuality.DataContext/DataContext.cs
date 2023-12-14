@@ -16,6 +16,7 @@ namespace LifeQuality.DataContext
         public DbSet<SugarBloodAnalysisData> SugarBloodAnalysisData { get; set; }
         public DbSet<CholesterolBloodAnalysisData> CholesterolBloodAnalysisData { get; set; }
         public DbSet<Recomendation> Recomendations { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
         public DataContext(DbContextOptions<DataContext> options): base(options)
         {
 

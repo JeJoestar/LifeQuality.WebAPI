@@ -3,6 +3,7 @@ using System;
 using LifeQuality.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LifeQuality.DataContext.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231213214919_Notifications")]
+    partial class Notifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,6 +118,9 @@ namespace LifeQuality.DataContext.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("PatientId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("RecieverId")
                         .HasColumnType("integer");
 
@@ -124,6 +130,8 @@ namespace LifeQuality.DataContext.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AnalysisId");
+
+                    b.HasIndex("PatientId");
 
                     b.HasIndex("RecieverId");
 
@@ -385,8 +393,12 @@ namespace LifeQuality.DataContext.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LifeQuality.DataContext.Model.Patient", "Reciever")
+                    b.HasOne("LifeQuality.DataContext.Model.Patient", null)
                         .WithMany("Recomendations")
+                        .HasForeignKey("PatientId");
+
+                    b.HasOne("LifeQuality.DataContext.Model.User", "Reciever")
+                        .WithMany()
                         .HasForeignKey("RecieverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

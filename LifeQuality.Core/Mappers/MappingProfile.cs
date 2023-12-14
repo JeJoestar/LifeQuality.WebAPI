@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LifeQuality.Core.DTOs;
 using LifeQuality.Core.DTOs.Analysis;
+using LifeQuality.Core.DTOs.Notifications;
 using LifeQuality.Core.DTOs.Recommendations;
 using LifeQuality.Core.DTOs.Sensors;
 using LifeQuality.Core.DTOs.Users;
@@ -37,6 +38,8 @@ namespace LifeQuality.WebAPI.Mappers
 
             CreateMap<Sensor, SensorStatusDTO>().ReverseMap();
             CreateMap<Patient, FastEntityDto>().ReverseMap();
+            CreateMap<Notification, NotificationDto>()
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.RawText)).ReverseMap();
 
             CreateMap<BloodAnalysisData, SmallAnalysisDto>()
                 .ForMember(dest => dest.ReceivedAt, opt => opt.MapFrom(src => src.ReceivedAt))

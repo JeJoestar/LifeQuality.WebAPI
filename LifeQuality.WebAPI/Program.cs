@@ -1,11 +1,11 @@
 using Hangfire;
 using Hangfire.PostgreSql;
 using LifeQuality.Core;
+using LifeQuality.Core.Hubs;
 using LifeQuality.Core.Services;
 using LifeQuality.DataContext;
 using LifeQuality.DataContext.Model;
 using LifeQuality.DataContext.Repository;
-using LifeQuality.WebAPI.Hubs;
 using LifeQuality.WebAPI.Mappers;
 using LifeQuality.WebAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -29,6 +29,7 @@ builder.Services.AddScoped(typeof(IDataRepository<Doctor>), typeof(DataRepositor
 builder.Services.AddScoped(typeof(IDataRepository<Recomendation>), typeof(DataRepository<Recomendation>));
 builder.Services.AddScoped(typeof(IDataRepository<Sensor>), typeof(DataRepository<Sensor>));
 builder.Services.AddScoped(typeof(IDataRepository<BloodAnalysisData>), typeof(DataRepository<BloodAnalysisData>));
+builder.Services.AddScoped(typeof(IDataRepository<Notification>), typeof(DataRepository<Notification>));
 
 builder.Services.AddTransient<ILoginService, LoginService>();
 builder.Services.AddTransient<ITokenService, TokenService>();

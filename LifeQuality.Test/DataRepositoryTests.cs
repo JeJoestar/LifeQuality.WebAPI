@@ -3,11 +3,13 @@ using LifeQuality.DataContext.Model;
 using LifeQuality.DataContext.Repository;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using NUnit.Framework;
 using System.Linq;
 using System.Linq.Expressions;
 
 namespace LifeQuality.Test
 {
+    [TestFixture]
     public class DataRepositoryTests<TEntity> where TEntity : EntityBase
     {
         private Mock<IDataContext> _mockContext;

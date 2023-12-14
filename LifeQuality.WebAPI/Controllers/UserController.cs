@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using LifeQuality.Core.DTOs;
+using LifeQuality.Core.DTOs.Notifications;
 using LifeQuality.Core.DTOs.Users;
+using LifeQuality.Core.Hubs;
 using LifeQuality.Core.Requests;
 using LifeQuality.Core.Services;
 using LifeQuality.DataContext.Enums;
 using LifeQuality.DataContext.Model;
 using LifeQuality.DataContext.Repository;
-using LifeQuality.WebAPI.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -22,21 +23,23 @@ namespace LifeQuality.WebAPI.Controllers
     {
         private readonly IDataRepository<Patient> _patientRepository;
         private readonly IDataRepository<Doctor> _doctorRepository;
+        private readonly IDataRepository<Notification> _notificationsRepository;
         private readonly IDataRepository<Recomendation> _recomendationRepository;
-        private readonly IHubContext<MainHub, IMainHub> _hubContext;
+        private readonly IHubContext<MainHub> _hubContext;
         private readonly IMapper _mapper;
         public UserController(IMapper mapper,
             IDataRepository<Patient> patientRepository,
             IDataRepository<Doctor> doctorRepository,
-            IDataRepository<User> userRepository,
+            IDataRepository<Notification> notificationsRepository,
             IDataRepository<Recomendation> recomendationRepository,
-            IHubContext<MainHub, IMainHub> hubContext) 
+            IHubContext<MainHub> hubContext) 
         {
             _mapper = mapper;
             _patientRepository = patientRepository;
             _doctorRepository = doctorRepository;
             _hubContext = hubContext;
             _recomendationRepository = recomendationRepository;
+            _notificationsRepository = notificationsRepository;
         }
 
         [HttpGet("patients")]
@@ -132,8 +135,9 @@ namespace LifeQuality.WebAPI.Controllers
         {
             var patientToReturn = await _patientRepository
                 .Include(p => p.BloodAnalysisDatas)
+                    .ThenInclude(b => b.Sensor)
                 .Include(p => p.Doctor)
-                .Include(p => p.BloodAnalysisDatas)
+                .Include(p => p.Recomendations)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (patientToReturn == null)
@@ -161,14 +165,48 @@ namespace LifeQuality.WebAPI.Controllers
             _recomendationRepository.AddNew(rec);
             await _recomendationRepository.SaveAsync();
 
-            await _hubContext.Clients.User(receiver.Id.ToString()).ReceiveNotification(new ()
+            var notification = new Notification()
             {
-                DoctorName = doctorToReturn.Name,
-                Message = recommendationRequest.Message,
-                ReceivedAt = DateTime.UtcNow,
+                Created = DateTime.Now,
+                RawText = "New analysis",
+                ReceiverId = receiver.Id,
+                NotificationType = NotificationType.NewAnalysis,
+            };
+
+            _notificationsRepository.AddNew(notification);
+            await _notificationsRepository.SaveAsync();
+
+            await _hubContext.Clients.User(receiver.Id.ToString()).SendAsync("ReceiveNotification", new NotificationDto ()
+            {
+                Id = notification.Id,
+                NotificationType = NotificationType.NewRecommendation,
+                Title = "You received a new recommendation",
             });
 
             return Ok();
+        }
+
+
+        [HttpGet("recomendation/{id}")]
+        [ProducesResponseType(typeof(RecommendationDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CreateRecomendation([FromRoute] int id)
+        {
+            var recommendation = await _recomendationRepository
+                .Include(r => r.Reciever)
+                    .ThenInclude(p => p.Doctor)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (recommendation is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new RecommendationDto()
+            {
+                DoctorName = recommendation.Reciever.Doctor.Name,
+                Message = recommendation.Content,
+                ReceivedAt = recommendation.CreatedAt ?? DateTime.UtcNow,
+            });
         }
 
         [HttpPost("patient")]
@@ -217,6 +255,17 @@ namespace LifeQuality.WebAPI.Controllers
             await _doctorRepository.SaveAsync();
 
             return Ok();
+        }
+
+        [HttpGet("notifications")]
+        [ProducesResponseType(typeof(List<NotificationDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetUserNotifications()
+        {
+            int userId = int.Parse(User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
+
+            List<Notification> notifications = await _notificationsRepository.GetByManyAsync(u => u.ReceiverId == userId) ?? new List<Notification>();
+
+            return Ok(_mapper.Map<List<Notification>, List<NotificationDto>>(notifications));
         }
     }
 }
